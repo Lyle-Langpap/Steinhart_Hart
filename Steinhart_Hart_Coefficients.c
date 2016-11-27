@@ -5,6 +5,7 @@
 
 
 /// Calculate the coefficients based on three sets of temperature and resistance.
+/// The Steinhart-Hart equation is 1/T = A + Bln(r) + C[ln(r)]^3.
 /// Use Cramer's Rule to solve the three linear equations.
 /// The three pairs should be the lowest temperature you need to read,
 /// the highest temperature you need to read, and a temperature in the middle.
@@ -16,8 +17,6 @@ struct Steinhart_Hart_Coefficients Get_Coefficients(
 		const float r2, const float t2, 
 		const float r3, const float t3)
 {
-	struct Steinhart_Hart_Coefficients coefficients;
-
 	float ln_r1 = log(r1);
 	float ln_r2 = log(r2);
 	float ln_r3 = log(r3);
@@ -26,35 +25,20 @@ struct Steinhart_Hart_Coefficients Get_Coefficients(
 	float ln_r2_cubed = ln_r2 * ln_r2 * ln_r2;
 	float ln_r3_cubed = ln_r3 * ln_r3 * ln_r3;
 
-	struct Matrix_3x3 matrix;
-
-	Matrix_3x3_Init(&matrix, 
+	struct Matrix_3x3 matrix1;
+	Matrix_3x3_Init(&matrix1, 
 		1, ln_r1, ln_r1_cubed, 
 		1, ln_r2, ln_r2_cubed, 
 		1, ln_r3, ln_r3_cubed);
 
-	float denominator = Matrix_3x3_Determinant(&matrix);
+	struct Matrix_3x1 matrix2;
+	Matrix_3x1_Init(&matrix2, 1.0f / t1, 1.0f / t2, 1.0f / t3);
 
-	Matrix_3x3_Init(&matrix, 
-		1.0f / t1, ln_r1, ln_r1_cubed, 
-		1.0f / t2, ln_r2, ln_r2_cubed, 
-		1.0f / t3, ln_r3, ln_r3_cubed);
+	struct Matrix_3x1 solution = Matrix_3x3_Cramers_Rule(&matrix1, &matrix2);
 
-	coefficients.a = Matrix_3x3_Determinant(&matrix) / denominator;
-
-	Matrix_3x3_Init(&matrix, 
-		1, 1.0f / t1, ln_r1_cubed, 
-		1, 1.0f / t2, ln_r2_cubed, 
-		1, 1.0f / t3, ln_r3_cubed);
-
-	coefficients.b = Matrix_3x3_Determinant(&matrix) / denominator;
-
-	Matrix_3x3_Init(&matrix, 
-		1, ln_r1, 1.0f / t1, 
-		1, ln_r2, 1.0f / t2, 
-		1, ln_r3, 1.0f / t3);
-
-	coefficients.c = Matrix_3x3_Determinant(&matrix) / denominator;
-
+	struct Steinhart_Hart_Coefficients coefficients;
+	coefficients.a = Matrix_3x1_Element(&solution, 1, 1);
+	coefficients.b = Matrix_3x1_Element(&solution, 2, 1);
+	coefficients.c = Matrix_3x1_Element(&solution, 3, 1);
 	return coefficients;
 }

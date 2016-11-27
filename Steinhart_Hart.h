@@ -4,7 +4,6 @@
 
 #include <math.h>
 
-#include "Matrix/Matrix_3x3.h"
 #include "Steinhart_Hart_Coefficients.h"
 
 

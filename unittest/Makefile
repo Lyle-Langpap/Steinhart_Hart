@@ -9,6 +9,7 @@ INC += -I ../ANSI/
 LIB := -lm
 
 FILES := ../Test/Test.c
+FILES += ../Matrix/Matrix_3x3.c
 FILES += ../Steinhart_Hart_Coefficients.c
 
 
