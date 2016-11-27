@@ -1,6 +1,9 @@
 CC := gcc
 
 FLAGS := -std=c99
+FLAGS += -O2
+FLAGS += -g3
+FLAGS += -ggdb
 FLAGS += -Wall
 
 INC := -I ../
